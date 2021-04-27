@@ -37,10 +37,11 @@ def main() -> None:
                     raise Exception(f"Error: Did not supply {field}")
 
             for i in range(len(fields) - 1):
-                value = content[splices[i] + len(field[i]) + 1: splices[i + 1]]
+                value = content[splices[i] + len(fields[i]) + 1: splices[i + 1]]
                 value = value.strip()
-                info[field[i]] = value
+                info[fields[i]] = value
 
+            info["Image"] = content[splices[-1] + len(fields[-1]) + 1:].strip()
             info["Date"] = datetime.now().strftime("%B") + " " + str(datetime.now().year)
 
         page_src: list = list()
@@ -61,11 +62,17 @@ def main() -> None:
         thumbnail_idx: int = 0
 
         for i, line in enumerate(page_src):
-            if "section" in line and "id=portfolio" in line:
+            if "section" in line and "id=\"portfolio\"" in line:
                 for j in range(i + 1, len(page_src)):
-                    if "</section>" in page_src[i]:
-                        thumbnail_idx = j - 1
+                    if "</section>" in page_src[j]:
+                        thumbnail_idx = j - 2
                         break
+                break
+
+        description_index: int = 0
+        for i, line in enumerate(reversed(page_src)):
+            if "</div>" in line:
+                description_index = -i
                 break
 
         page_src.insert(thumbnail_idx, project_thumbnail_template.format(new_id,
@@ -73,7 +80,7 @@ def main() -> None:
                                                                          info["Title"],
                                                                          info["Subtitle"]))
 
-        page_src.insert(-2, project_description_template.format(new_id,
+        page_src.insert(description_index, project_description_template.format(new_id,
                                                         info["Title"],
                                                         info["Subtitle"],
                                                         info["Image"],
