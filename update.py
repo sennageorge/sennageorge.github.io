@@ -93,7 +93,7 @@ def main() -> None:
 
 
 
-        os.system("git add --all; git commit -m 'update'; git push origin main")
+        os.system("git add --all; git commit -m 'update'; git push -f origin main")
 
     return 0
 
